@@ -41,3 +41,34 @@ jobs:
                   context: .
                   push: true
                   tags: ${{ secrets.DOCKER_USERNAME }}/duties-api:latest
+
+    deploy:
+        needs: docker-build
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+                  aws-region: eu-north-1
+
+            - name: Set up Terraform
+              uses: hashicorp/setup-terraform@v2
+              with:
+                  terraform_version: 1.14.0
+
+            - name: Run Terraform init
+              env:
+                  TF_VAR_docker_username: ${{secrets.DOCKER_USERNAME}}
+              run: terraform init
+
+            - name: Run Terraform apply
+              env:
+                  TF_VAR_docker_username: ${{secrets.DOCKER_USERNAME}}
+              run: terraform apply -auto-approve
