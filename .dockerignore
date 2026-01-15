@@ -1,0 +1,13 @@
+bin/
+lib/
+*.cfg
+__pycache__
+venv
+.pytest_cache
+.vscode
+*.tfstate
+*.tfstate.*
+.terraform
+node_modules
+cypress/screenshots/
+.coverage
