@@ -47,3 +47,14 @@ def test_can_get_created_ksb(client):
     result = response.get_json()
     assert len(result) == 1
     assert result[0]["code"] == "test code"
+
+def test_can_get_ksb_by_id(client):
+    ksb_data = {"code": "test code", "description": "test description"}
+    post_response = client.post('/ksbs', json=ksb_data)
+    ksb = post_response.get_json()
+    id = ksb["id"]
+    response = client.post(f"/ksbs/{id}")
+    result = response.get_json()
+    assert result["id"] == id
+    assert result ["code"] == "test code"
+

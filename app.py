@@ -21,7 +21,6 @@ def create_app(config_name="default"):
 
       @app.post('/ksbs')
       def post_ksb():
-            ksb = {"id": str(uuid.uuid4()), "code": "k1", "description": "test description"}
             data = request.json
             code = data["code"]
             description = data["description"]
@@ -29,6 +28,12 @@ def create_app(config_name="default"):
             db.session.add(new_ksb)
             db.session.commit()
             return jsonify(new_ksb.to_dict()), 201
+      
+      @app.route('/ksbs/<string:id>', methods=["POST"])
+      def get_ksb_by_id(id):
+            ksb = Ksb.query.filter_by(id=id).first_or_404(description=f"Ksb with id {id} not found.")
+            return jsonify(ksb.to_dict())
+
       
       return app  
 
