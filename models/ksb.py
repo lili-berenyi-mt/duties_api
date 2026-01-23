@@ -18,3 +18,7 @@ class Ksb(db.Model):
             "code": self.code,
             "description": self.description
         }
+    
+    def update(self, new_code, new_description):
+        self.code = new_code
+        self.description = new_description

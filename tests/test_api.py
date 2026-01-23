@@ -78,4 +78,31 @@ def test_deleted_ksb_should_not_exitst(client):
     response = client.get(f"/ksbs/{id}") 
     assert response.status_code == 404
 
+def test_updated_ksb_has_updated_data(client):
+    ksb_data = {"code": "test code", "description": "test description"}
+    ksb = client.post("/ksbs", json=ksb_data).get_json()
+    id = ksb["id"]
+    updated_ksb_data = {"code": "test code 2", "description": "test description 2"}
+    response = client.put(f"/ksbs/{id}", json=updated_ksb_data)
+    assert response.status_code == 200
+    updated_ksb = response.get_json()
+    assert updated_ksb["code"] == "test code 2"
+    assert updated_ksb["description"] == "test description 2"
+
+def test_getting_ksb_after_updating_has_updated_data(client):
+    ksb_data = {"code": "test code", "description": "test description"}
+    ksb = client.post("/ksbs", json=ksb_data).get_json()
+    id = ksb["id"]
+    updated_ksb_data = {"code": "test code 2", "description": "test description 2"}
+    client.put(f"/ksbs/{id}", json=updated_ksb_data)
+    response = client.get(f"/ksbs/{id}")
+    updated_ksb = response.get_json()
+    assert updated_ksb["code"] == "test code 2"
+    assert updated_ksb["description"] == "test description 2"
+
+
+def test_cannot_updated_invalid_ksb(client):
+    updated_ksb_data = {"code": "test code 2", "description": "test description 2"}
+    response = client.put("/ksbs/1234567890", json=updated_ksb_data)
+    assert response.status_code == 404
     

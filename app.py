@@ -40,6 +40,16 @@ def create_app(config_name="default"):
             db.session.delete(ksb)
             db.session.commit()     
             return "", 204
+      
+      @app.put('/ksbs/<string:id>')
+      def put_ksb_by_id(id):
+            data = request.json
+            new_code = data["code"]
+            new_description = data["description"]
+            ksb = Ksb.query.filter_by(id=id).first_or_404(description=f"Ksb with id {id} not found.")
+            ksb.update(new_code=new_code, new_description=new_description)
+            db.session.commit()
+            return jsonify(ksb.to_dict()), 200
 
       return app  
 
