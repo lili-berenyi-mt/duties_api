@@ -33,6 +33,13 @@ def create_app(config_name="default"):
       def get_ksb_by_id(id):
             ksb = Ksb.query.filter_by(id=id).first_or_404(description=f"Ksb with id {id} not found.")
             return jsonify(ksb.to_dict())
+      
+      @app.route('/ksbs/<string:id>', methods=["DELETE"])
+      def delete_ksb_by_id(id):
+            ksb = Ksb.query.filter_by(id=id).first_or_404(description=f"Ksb with id {id} not found.")
+            db.session.delete(ksb)
+            db.session.commit()     
+            return "", 204
 
       
       return app  

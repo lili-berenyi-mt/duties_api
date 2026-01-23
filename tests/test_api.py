@@ -22,6 +22,7 @@ def test_get_ksbs_returns_empty_list(client):
 def test_can_create_new_ksb(client):
     ksb = {"code": "test code", "description": "test description"}
     response = client.post('/ksbs', json=ksb)
+    assert response.status_code == 201
     result = response.get_json()
     assert result["code"] == "test code"
     assert result["description"] == "test description"
@@ -58,3 +59,23 @@ def test_can_get_ksb_by_id(client):
     assert result["id"] == id
     assert result ["code"] == "test code"
 
+def test_getting_ksb_with_invalid_id_returns_404(client):
+    response = client.post("/ksbs/1234567890")
+    assert response.status_code == 404
+
+def test_deleting_existing_ksb_returns_204(client):
+    ksb_data = {"code": "test code", "description": "test description"}
+    ksb = client.post("/ksbs", json=ksb_data).get_json()
+    id = ksb["id"]
+    response = client.delete(f"ksbs/{id}")
+    assert response.status_code == 204
+
+def test_deleted_ksb_should_not_exitst(client):
+    ksb_data = {"code": "test code", "description": "test description"}
+    ksb = client.post("/ksbs", json=ksb_data).get_json()
+    id = ksb["id"]
+    client.delete(f"/ksbs/{id}")
+    response = client.post(f"/ksbs/{id}") 
+    assert response.status_code == 404
+
+    
