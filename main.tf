@@ -8,6 +8,12 @@ variable "docker_username" {
   sensitive = true
 }
 
+variable "database_url" {
+  type        = string
+  description = "Connection string for the database"
+  sensitive   = true
+}
+
 data "aws_ami" "ubuntu" {
   most_recent = true
   filter {
@@ -41,6 +47,7 @@ resource "aws_instance" "app_server" {
   user_data = templatefile("${path.module}/cloud-init.yml.tmpl", {
     instance_name = "duties-api-lili"
     docker_username = var.docker_username
+    database_url    = var.database_url
   })
   tags = {
     Name = "duties_api_lili"

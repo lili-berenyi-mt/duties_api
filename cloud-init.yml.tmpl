@@ -31,4 +31,9 @@ runcmd:
   - sudo docker pull ${docker_username}/duties-api:latest
   - sudo docker stop duties-api
   - sudo docker rm duties-api
-  - sudo docker run -d -p 5000:5000 --name duties-api docker.io/${docker_username}/duties-api:latest
+  - sudo docker run -d \
+    -p 5000:5000 \
+    --name duties-api \
+    --restart always \
+    -e DATABASE_URL="${database_url}" \
+    docker.io/${docker_username}/duties-api:latest
