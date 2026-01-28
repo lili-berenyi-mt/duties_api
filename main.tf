@@ -1,11 +1,11 @@
 provider "aws" {
-    region="eu-north-1"
+  region = "eu-north-1"
 }
 
 variable "docker_username" {
   type        = string
   description = "DockerHub username"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "database_url" {
@@ -45,7 +45,7 @@ resource "aws_instance" "app_server" {
   vpc_security_group_ids = ["sg-0d951b9dddd0a3768"]
   key_name               = "terraform-key"
   user_data = templatefile("${path.module}/cloud-init.yml.tmpl", {
-    instance_name = "duties-api-lili"
+    instance_name   = "duties-api-lili"
     docker_username = var.docker_username
     database_url    = var.database_url
   })
@@ -56,5 +56,5 @@ resource "aws_instance" "app_server" {
 
 output "ec2_public_ip" {
   description = "Public IP address of the EC2 instance"
-  value = aws_instance.app_server.public_ip
+  value       = aws_instance.app_server.public_ip
 }
