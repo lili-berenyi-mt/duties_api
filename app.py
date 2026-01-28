@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from models import db, Ksb
-import config
-import uuid
+import os
 
 def create_app(config_name="default"):
       app = Flask(__name__)
@@ -10,7 +9,7 @@ def create_app(config_name="default"):
             app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
             app.config['TESTING'] = True
       else:
-            app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}"
+            app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 
       db.init_app(app)
 
