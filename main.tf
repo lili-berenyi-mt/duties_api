@@ -41,7 +41,7 @@ resource "local_file" "public_key" {
 resource "aws_instance" "app_server" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t3.micro"
-  subnet_id              = "subnet-84e2f4fc"
+  subnet_id              = "subnet-ba3fc8d3"
   vpc_security_group_ids = ["sg-00d5a1d67232f43a4"]
   key_name               = "terraform-key"
   user_data = templatefile("${path.module}/cloud-init.yml.tmpl", {
