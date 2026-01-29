@@ -10,8 +10,8 @@ class Base(DeclarativeBase):
 class Ksb(db.Model):
     __tablename__ = 'ksbs'
     id = db.Column(db.String(36), default=lambda: str(uuid.uuid4()), primary_key=True)
-    code = db.Column('name', db.String(255), nullable=False)
-    description = db.Column('description', db.Text)
+    code = db.Column('name', db.String(255), nullable=False, unique=True)
+    description = db.Column('description', db.String(255), nullable=False)
 
     @validates('code')
     def validate_code(self, key, value):

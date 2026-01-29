@@ -136,3 +136,12 @@ def test_creating_ksb_with_invalid_description_returns_400(client):
     data = reponse.get_json()
     assert "error" in data
     assert data["error"] == "Description must be a non-empty string under 255 characters."
+
+def test_creating_ksb_with_existing_code_returns_400(client):
+    ksb_data = {"code": "K1", "description": "Test description"}
+    client.post("/ksbs", json=ksb_data)
+    reponse = client.post("/ksbs", json=ksb_data)
+    assert reponse.status_code == 400
+    data = reponse.get_json()
+    assert "error" in data
+    assert data["error"] == "A KSB with this code already exists."
