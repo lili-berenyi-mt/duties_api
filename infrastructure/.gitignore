@@ -1,6 +1,7 @@
 .terraform/
 terraform.tfstate
 terraform.tfstate.backup
+.ssh/
 terraform.tfvars
 terraform_rsa
 terraform_rsa.pub
