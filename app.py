@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from models import db, Ksb
+from models import db, Ksb, Duty
 import os
+import uuid
 
 def create_app(config_name="default"):
       app = Flask(__name__)
@@ -59,6 +60,31 @@ def create_app(config_name="default"):
             ksb.update(new_code=new_code, new_description=new_description)
             db.session.commit()
             return jsonify(ksb.to_dict()), 200
+      
+      @app.get('/duties')
+      def get_all_duties():
+            # ksbs = Duty.query.all()
+            # return jsonify([k.to_dict() for k in ksbs]), 200
+            duties = Duty.query.all()
+            return jsonify([d.to_dict() for d in duties]), 200
+
+      @app.post('/duties')
+      def post_duty():
+            data = request.json
+            if 'name' not in data or 'description' not in data:
+                  return {"error": "Missing required fields. Request must contain name and description."}, 400
+            name = data["name"]
+            description = data["description"]
+            try:
+                  new_duty = Duty(name=name, description=description)
+                  db.session.add(new_duty)
+                  db.session.commit()
+                  return jsonify(new_duty.to_dict()), 201
+            except IntegrityError:
+                  db.session.rollback()
+                  return {"error": "A duty with this name already exists."}, 400
+            except ValueError as e:
+                  return {"error": str(e)}, 400
 
       return app  
 

@@ -7,3 +7,4 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 from .ksb import Ksb
+from .duty import Duty
