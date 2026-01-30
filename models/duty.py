@@ -7,11 +7,17 @@ import re
 class Base(DeclarativeBase):
     pass
 
+duty_ksb = db.Table('duty_ksb',
+    db.Column('duty_id', db.String(36), db.ForeignKey('duties.id'), primary_key=True),
+    db.Column('ksb_id', db.String(36), db.ForeignKey('ksbs.id'), primary_key=True)
+)
+
 class Duty(db.Model):
     __tablename__ = 'duties'
     id = db.Column(db.String(36), default=lambda: str(uuid.uuid4()), primary_key=True)
     name = db.Column('name', db.String(255), nullable=False, unique=True)
     description = db.Column('description', db.String(255), nullable=False)
+    ksbs = db.relationship('Ksb', secondary=duty_ksb, backref='duties')
 
     @validates('name')
     def validate_name(self, key, value):
@@ -30,5 +36,6 @@ class Duty(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "description": self.description
+            "description": self.description,
+            "ksbs": [ksb.code for ksb in self.ksbs]
         }

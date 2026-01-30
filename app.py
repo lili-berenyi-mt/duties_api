@@ -63,20 +63,31 @@ def create_app(config_name="default"):
       
       @app.get('/duties')
       def get_all_duties():
-            # ksbs = Duty.query.all()
-            # return jsonify([k.to_dict() for k in ksbs]), 200
             duties = Duty.query.all()
             return jsonify([d.to_dict() for d in duties]), 200
 
       @app.post('/duties')
       def post_duty():
-            data = request.json
+            data = request.json or {}
             if 'name' not in data or 'description' not in data:
                   return {"error": "Missing required fields. Request must contain name and description."}, 400
+            ksb_ids = data.get('ksb_ids', [])
+            if not isinstance(ksb_ids, list):
+                  return {"error": "ksb_ids must be a list of strings"}, 400
+            
             name = data["name"]
             description = data["description"]
             try:
                   new_duty = Duty(name=name, description=description)
+                  db.session.add(new_duty)
+                  if 'ksb_ids' in data:
+                        for ksb_id in data['ksb_ids']:
+                              ksb = Ksb.query.filter_by(id=ksb_id).first()
+                              if ksb:
+                                    new_duty.ksbs.append(ksb)
+                              else:
+                                    return {"error": f"KSB with ID '{ksb_id}' not found"}, 400
+
                   db.session.add(new_duty)
                   db.session.commit()
                   return jsonify(new_duty.to_dict()), 201
@@ -97,6 +108,9 @@ def create_app(config_name="default"):
             db.session.delete(duty)
             db.session.commit()     
             return "", 204
+
+      with app.app_context():
+            db.create_all()
 
       return app  
 
