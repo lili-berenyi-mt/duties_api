@@ -85,6 +85,18 @@ def create_app(config_name="default"):
                   return {"error": "A duty with this name already exists."}, 400
             except ValueError as e:
                   return {"error": str(e)}, 400
+            
+      @app.get('/duties/<string:id>')
+      def get_duty_by_id(id):
+            duty = Duty.query.filter_by(id=id).first_or_404(description=f"Duty with id {id} not found.")
+            return jsonify(duty.to_dict()), 200
+      
+      @app.delete('/duties/<string:id>')
+      def delete_duty_by_id(id):
+            duty = Duty.query.filter_by(id=id).first_or_404(description=f"Duty with id {id} not found.")
+            db.session.delete(duty)
+            db.session.commit()     
+            return "", 204
 
       return app  
 

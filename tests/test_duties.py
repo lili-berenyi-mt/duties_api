@@ -90,3 +90,32 @@ def test_creating_duty_with_existing_code_returns_400(client):
     data = reponse.get_json()
     assert "error" in data
     assert data["error"] == "A duty with this name already exists."
+
+def test_can_get_duty_by_id(client):
+    duty_data = {"name": "Duty 1", "description": "Test description"}
+    post_response = client.post('/duties', json=duty_data)
+    duty = post_response.get_json()
+    id = duty["id"]
+    response = client.get(f"/duties/{id}")
+    result = response.get_json()
+    assert result["id"] == id
+    assert result ["name"] == "Duty 1"
+
+def test_getting_duty_with_invalid_id_returns_404(client):
+    response = client.get("/duties/1234567890")
+    assert response.status_code == 404
+
+def test_deleting_existing_duty_returns_204(client):
+    duty_data = {"name": "Duty 1", "description": "Test description"}
+    duty = client.post("/duties", json=duty_data).get_json()
+    id = duty["id"]
+    response = client.delete(f"duties/{id}")
+    assert response.status_code == 204
+
+def test_deleted_duty_should_not_exitst(client):
+    duty_data = {"name": "Duty 1", "description": "Test description"}
+    duty = client.post("/duties", json=duty_data).get_json()
+    id = duty["id"]
+    client.delete(f"/duties/{id}")
+    response = client.get(f"/duties/{id}") 
+    assert response.status_code == 404
