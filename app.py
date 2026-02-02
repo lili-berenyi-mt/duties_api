@@ -150,6 +150,12 @@ def create_app(config_name="default"):
             db.session.commit()     
             return "", 204
       
+      @app.get('/duties/search/<string:code>')
+      def get_themes_by_duty_code(code):
+            duty = Duty.query.filter_by(code=code).first_or_404(description=f"Duty with code '{code}' not found.")
+            themes = [t.name for t in duty.themes]
+            return jsonify({"duty": code, "themes": themes}), 200
+      
       with app.app_context():
             db.create_all()
 
