@@ -1,8 +1,7 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from models import db, Ksb, Duty
+from models import db, Ksb, Duty, Theme
 import os
-import uuid
 
 def create_app(config_name="default"):
       app = Flask(__name__)
@@ -69,16 +68,16 @@ def create_app(config_name="default"):
       @app.post('/duties')
       def post_duty():
             data = request.json or {}
-            if 'name' not in data or 'description' not in data:
-                  return {"error": "Missing required fields. Request must contain name and description."}, 400
+            if 'code' not in data or 'description' not in data:
+                  return {"error": "Missing required fields. Request must contain code and description."}, 400
             ksb_ids = data.get('ksb_ids', [])
             if not isinstance(ksb_ids, list):
                   return {"error": "ksb_ids must be a list of strings"}, 400
             
-            name = data["name"]
+            code = data["code"]
             description = data["description"]
             try:
-                  new_duty = Duty(name=name, description=description)
+                  new_duty = Duty(code=code, description=description)
                   db.session.add(new_duty)
                   if 'ksb_ids' in data:
                         for ksb_id in data['ksb_ids']:
@@ -87,13 +86,11 @@ def create_app(config_name="default"):
                                     new_duty.ksbs.append(ksb)
                               else:
                                     return {"error": f"KSB with ID '{ksb_id}' not found"}, 400
-
-                  db.session.add(new_duty)
                   db.session.commit()
                   return jsonify(new_duty.to_dict()), 201
             except IntegrityError:
                   db.session.rollback()
-                  return {"error": "A duty with this name already exists."}, 400
+                  return {"error": "A duty with this code already exists."}, 400
             except ValueError as e:
                   return {"error": str(e)}, 400
             
@@ -109,6 +106,50 @@ def create_app(config_name="default"):
             db.session.commit()     
             return "", 204
 
+      @app.get('/themes')
+      def get_all_themes():
+            themes = Theme.query.all()
+            return jsonify([t.to_dict() for t in themes]), 200
+      
+      @app.post('/themes')
+      def post_theme():
+            data = request.json
+            if 'name' not in data or 'description' not in data:
+                  return {"error": "Missing required fields. Request must contain name and description."}, 400
+            duty_ids = data.get('duty_ids', [])
+            if not isinstance(duty_ids, list):
+                  return {"error": "duty_ids must be a list of strings"}, 400
+            try:
+                  new_theme = Theme(name=data["name"], description=data["description"])
+                  db.session.add(new_theme)
+                  if 'duty_ids' in data:
+                        for duty_id in data['duty_ids']:
+                              duty = Duty.query.filter_by(id=duty_id).first()
+                              if duty:
+                                    new_theme.duties.append(duty)
+                              else:
+                                    return {"error": f"Duty with ID '{duty_id}' not found"}, 400
+                  db.session.commit()
+                  return jsonify(new_theme.to_dict()), 201
+            except IntegrityError:
+                  db.session.rollback()
+                  return {"error": "A theme with this name already exists."}, 400
+            except ValueError as e:
+                  return {"error": str(e)}, 400
+
+      
+      @app.get('/themes/<string:id>')
+      def get_theme_by_id(id):
+            theme = Theme.query.filter_by(id=id).first_or_404(description=f"Theme with id '{id}' not found.")
+            return jsonify(theme.to_dict()), 200
+
+      @app.delete('/themes/<string:id>')
+      def delete_theme_by_id(id):
+            theme = Theme.query.filter_by(id=id).first_or_404(description=f"theme with id '{id}' not found.")
+            db.session.delete(theme)
+            db.session.commit()     
+            return "", 204
+      
       with app.app_context():
             db.create_all()
 
