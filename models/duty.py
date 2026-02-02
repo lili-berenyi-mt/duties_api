@@ -15,15 +15,15 @@ duty_ksb = db.Table('duty_ksb',
 class Duty(db.Model):
     __tablename__ = 'duties'
     id = db.Column(db.String(36), default=lambda: str(uuid.uuid4()), primary_key=True)
-    name = db.Column('name', db.String(255), nullable=False, unique=True)
+    code = db.Column('code', db.String(10), nullable=False, unique=True)
     description = db.Column('description', db.String(255), nullable=False)
     ksbs = db.relationship('Ksb', secondary=duty_ksb, backref='duties')
 
-    @validates('name')
-    def validate_name(self, key, value):
-        pattern = r"^Duty \d{1,2}$"
+    @validates('code')
+    def validate_code(self, key, value):
+        pattern = r"^D\d{1,2}$"
         if not value or not re.match(pattern, value):
-            raise ValueError(f"Invalid name '{value}'. Must start with 'Duty ' followed by 1 or 2 digits (e.g., 'Duty 1').")
+            raise ValueError(f"Invalid code '{value}'. Must start with 'D' followed by 1 or 2 digits (e.g., 'D1').")
         return value
     
     @validates('description')
@@ -35,7 +35,7 @@ class Duty(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "name": self.name,
+            "code": self.code,
             "description": self.description,
             "ksbs": [ksb.code for ksb in self.ksbs]
         }

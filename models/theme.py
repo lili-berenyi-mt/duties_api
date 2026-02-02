@@ -35,7 +35,7 @@ class Theme(db.Model):
             "id": self.id,
             "name": self.name,
             "description": self.description,
-            "duties": [duty.name for duty in self.duties]
+            "duties": [duty.code for duty in self.duties]
         }
     
     

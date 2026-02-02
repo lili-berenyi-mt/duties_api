@@ -68,16 +68,16 @@ def create_app(config_name="default"):
       @app.post('/duties')
       def post_duty():
             data = request.json or {}
-            if 'name' not in data or 'description' not in data:
-                  return {"error": "Missing required fields. Request must contain name and description."}, 400
+            if 'code' not in data or 'description' not in data:
+                  return {"error": "Missing required fields. Request must contain code and description."}, 400
             ksb_ids = data.get('ksb_ids', [])
             if not isinstance(ksb_ids, list):
                   return {"error": "ksb_ids must be a list of strings"}, 400
             
-            name = data["name"]
+            code = data["code"]
             description = data["description"]
             try:
-                  new_duty = Duty(name=name, description=description)
+                  new_duty = Duty(code=code, description=description)
                   db.session.add(new_duty)
                   if 'ksb_ids' in data:
                         for ksb_id in data['ksb_ids']:
@@ -90,7 +90,7 @@ def create_app(config_name="default"):
                   return jsonify(new_duty.to_dict()), 201
             except IntegrityError:
                   db.session.rollback()
-                  return {"error": "A duty with this name already exists."}, 400
+                  return {"error": "A duty with this code already exists."}, 400
             except ValueError as e:
                   return {"error": str(e)}, 400
             
@@ -105,9 +105,6 @@ def create_app(config_name="default"):
             db.session.delete(duty)
             db.session.commit()     
             return "", 204
-
-      with app.app_context():
-            db.create_all()
 
       @app.get('/themes')
       def get_all_themes():
@@ -152,6 +149,9 @@ def create_app(config_name="default"):
             db.session.delete(theme)
             db.session.commit()     
             return "", 204
+      
+      with app.app_context():
+            db.create_all()
 
       return app  
 

@@ -120,7 +120,7 @@ def test_deleted_theme_should_not_exitst(client):
     assert response.status_code == 404
 
 def test_creating_theme_with_duties_returns_201(client):
-    duty_data = {"name": "Duty 1", "description": "Duty test description"}
+    duty_data = {"code": "D1", "description": "Duty test description"}
     duty_response = client.post("/duties", json=duty_data)
     duty_id = duty_response.get_json()["id"]
 
@@ -128,7 +128,7 @@ def test_creating_theme_with_duties_returns_201(client):
     response = client.post("/themes", json=theme_data)
     assert response.status_code == 201
     data = response.get_json()
-    assert "Duty 1" in data["duties"]
+    assert "D1" in data["duties"]
 
 def test_creating_theme_with_invalid_duty_returns_400(client):
     theme_data = {"name": "Theme 1", "description": "Theme test description", "duty_ids": ["123456789"]}
@@ -139,10 +139,10 @@ def test_creating_theme_with_invalid_duty_returns_400(client):
     assert data["error"] == "Duty with ID '123456789' not found"
 
 def test_can_create_theme_with_multiple_duties(client):
-    duty1 = client.post("/duties", json={"name": "Duty 1", "description": "Test description 1"}).get_json()
-    duty2 = client.post("/duties", json={"name": "Duty 2", "description": "Test description 2"}).get_json()
+    duty1 = client.post("/duties", json={"code": "D1", "description": "Test description 1"}).get_json()
+    duty2 = client.post("/duties", json={"code": "D2", "description": "Test description 2"}).get_json()
     theme_data = {
-        "name": "theme 1",
+        "name": "Theme 1",
         "description": "Test description",
         "duty_ids": [duty1["id"], duty2["id"]]
     }
@@ -150,8 +150,8 @@ def test_can_create_theme_with_multiple_duties(client):
 
     assert response.status_code == 201
     data = response.get_json()
-    assert "Duty 1" in data["duties"]
-    assert "Duty 2" in data["duties"]
+    assert "D1" in data["duties"]
+    assert "D2" in data["duties"]
     assert len(data["duties"]) == 2
 
 def test_creating_theme_with_invalid_duty_data_returns_400(client):
