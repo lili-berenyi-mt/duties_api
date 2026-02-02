@@ -136,8 +136,15 @@ def create_app(config_name="default"):
       
       @app.get('/themes/<string:id>')
       def get_theme_by_id(id):
-            theme = Theme.query.filter_by(id=id).first_or_404(description=f"Theme with id {id} not found.")
+            theme = Theme.query.filter_by(id=id).first_or_404(description=f"Theme with id '{id}' not found.")
             return jsonify(theme.to_dict()), 200
+
+      @app.delete('/themes/<string:id>')
+      def delete_theme_by_id(id):
+            theme = Theme.query.filter_by(id=id).first_or_404(description=f"theme with id '{id}' not found.")
+            db.session.delete(theme)
+            db.session.commit()     
+            return "", 204
 
       return app  
 

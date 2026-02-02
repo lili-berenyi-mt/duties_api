@@ -103,3 +103,18 @@ def test_creating_theme_with_invalid_description_returns_400(client):
     data = reponse.get_json()
     assert "error" in data
     assert data["error"] == "Description must be a non-empty string under 255 characters."
+
+def test_deleting_existing_theme_returns_204(client):
+    theme_data = {"name": "Theme 1", "description": "Test description"}
+    theme = client.post("/themes", json=theme_data).get_json()
+    id = theme["id"]
+    response = client.delete(f"/themes/{id}")
+    assert response.status_code == 204
+
+def test_deleted_theme_should_not_exitst(client):
+    theme_data = {"name": "Theme 1", "description": "Test description"}
+    theme = client.post("/themes", json=theme_data).get_json()
+    id = theme["id"]
+    client.delete(f"/themes/{id}")
+    response = client.get(f"/themes/{id}") 
+    assert response.status_code == 404
