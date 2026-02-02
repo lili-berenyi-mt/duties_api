@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from models import db, Ksb
+from models import db, Ksb, Duty
 import os
+import uuid
 
 def create_app(config_name="default"):
       app = Flask(__name__)
@@ -59,6 +60,57 @@ def create_app(config_name="default"):
             ksb.update(new_code=new_code, new_description=new_description)
             db.session.commit()
             return jsonify(ksb.to_dict()), 200
+      
+      @app.get('/duties')
+      def get_all_duties():
+            duties = Duty.query.all()
+            return jsonify([d.to_dict() for d in duties]), 200
+
+      @app.post('/duties')
+      def post_duty():
+            data = request.json or {}
+            if 'name' not in data or 'description' not in data:
+                  return {"error": "Missing required fields. Request must contain name and description."}, 400
+            ksb_ids = data.get('ksb_ids', [])
+            if not isinstance(ksb_ids, list):
+                  return {"error": "ksb_ids must be a list of strings"}, 400
+            
+            name = data["name"]
+            description = data["description"]
+            try:
+                  new_duty = Duty(name=name, description=description)
+                  db.session.add(new_duty)
+                  if 'ksb_ids' in data:
+                        for ksb_id in data['ksb_ids']:
+                              ksb = Ksb.query.filter_by(id=ksb_id).first()
+                              if ksb:
+                                    new_duty.ksbs.append(ksb)
+                              else:
+                                    return {"error": f"KSB with ID '{ksb_id}' not found"}, 400
+
+                  db.session.add(new_duty)
+                  db.session.commit()
+                  return jsonify(new_duty.to_dict()), 201
+            except IntegrityError:
+                  db.session.rollback()
+                  return {"error": "A duty with this name already exists."}, 400
+            except ValueError as e:
+                  return {"error": str(e)}, 400
+            
+      @app.get('/duties/<string:id>')
+      def get_duty_by_id(id):
+            duty = Duty.query.filter_by(id=id).first_or_404(description=f"Duty with id {id} not found.")
+            return jsonify(duty.to_dict()), 200
+      
+      @app.delete('/duties/<string:id>')
+      def delete_duty_by_id(id):
+            duty = Duty.query.filter_by(id=id).first_or_404(description=f"Duty with id {id} not found.")
+            db.session.delete(duty)
+            db.session.commit()     
+            return "", 204
+
+      with app.app_context():
+            db.create_all()
 
       return app  
 
