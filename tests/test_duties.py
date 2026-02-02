@@ -162,3 +162,50 @@ def test_creating_duty_with_invalid_ksb_data_returns_400(client):
     }
     response = client.post("/duties", json=duty_data)
     assert response.status_code == 400 
+
+def test_get_reverse_lookup_duties_returns_one_theme(client):
+    duty_data = {"code": "D1", "description": "TDD"}
+    duty = client.post("/duties", json=duty_data).get_json()
+    theme_data = {
+        "name": "Theme 1", 
+        "description": "Test description", 
+        "duty_ids": [duty["id"]]
+    }
+    client.post("/themes", json=theme_data)
+
+    response = client.get("/duties/search/D1")
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["duty"] == "D1"
+    assert "Theme 1" in data["themes"]
+
+def test_get_reverse_lookup_invalid_duty_returns_404(client):
+    response = client.get("/duties/search/D1")
+
+    assert response.status_code == 404
+    data = response.get_json()
+
+def test_get_reverse_lookup_duties_returns_multiple_themes(client):
+    duty_data = {"code": "D1", "description": "Test description"}
+    duty = client.post("/duties", json=duty_data).get_json()
+    theme_data1 = {
+        "name": "Theme 1", 
+        "description": "Test description", 
+        "duty_ids": [duty["id"]]
+    }
+    theme_data2 = {
+        "name": "Theme 2", 
+        "description": "Test description", 
+        "duty_ids": [duty["id"]]
+    }
+    client.post("/themes", json=theme_data1)
+    client.post("/themes", json=theme_data2)
+
+    response = client.get("/duties/search/D1")
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["duty"] == "D1"
+    assert "Theme 1" in data["themes"]
+    assert "Theme 2" in data["themes"]
