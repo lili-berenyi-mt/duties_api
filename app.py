@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
 from models import db, Ksb, Duty, Theme
 import os
-import uuid
 
 def create_app(config_name="default"):
       app = Flask(__name__)
@@ -87,8 +86,6 @@ def create_app(config_name="default"):
                                     new_duty.ksbs.append(ksb)
                               else:
                                     return {"error": f"KSB with ID '{ksb_id}' not found"}, 400
-
-                  db.session.add(new_duty)
                   db.session.commit()
                   return jsonify(new_duty.to_dict()), 201
             except IntegrityError:
@@ -122,9 +119,19 @@ def create_app(config_name="default"):
             data = request.json
             if 'name' not in data or 'description' not in data:
                   return {"error": "Missing required fields. Request must contain name and description."}, 400
+            duty_ids = data.get('duty_ids', [])
+            if not isinstance(duty_ids, list):
+                  return {"error": "duty_ids must be a list of strings"}, 400
             try:
                   new_theme = Theme(name=data["name"], description=data["description"])
                   db.session.add(new_theme)
+                  if 'duty_ids' in data:
+                        for duty_id in data['duty_ids']:
+                              duty = Duty.query.filter_by(id=duty_id).first()
+                              if duty:
+                                    new_theme.duties.append(duty)
+                              else:
+                                    return {"error": f"Duty with ID '{duty_id}' not found"}, 400
                   db.session.commit()
                   return jsonify(new_theme.to_dict()), 201
             except IntegrityError:

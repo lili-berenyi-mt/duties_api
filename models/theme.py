@@ -6,11 +6,17 @@ import uuid
 class Base(DeclarativeBase):
     pass
 
+theme_duty = db.Table('theme_duty',
+    db.Column('theme_id', db.String(36), db.ForeignKey('themes.id'), primary_key=True),
+    db.Column('duty_id', db.String(36), db.ForeignKey('duties.id'), primary_key=True)
+)
+
 class Theme(db.Model):
     __tablename__ = 'themes'
     id = db.Column(db.String(36), default=lambda: str(uuid.uuid4()), primary_key=True)
     name = db.Column('name', db.String(255), nullable=False, unique=True)
     description = db.Column('description', db.String(255), nullable=False)
+    duties = db.relationship('Duty', secondary=theme_duty, backref='themes')
 
     @validates('name')
     def validate_name(self, key, value):
@@ -28,7 +34,8 @@ class Theme(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "description": self.description
+            "description": self.description,
+            "duties": [duty.name for duty in self.duties]
         }
     
     
