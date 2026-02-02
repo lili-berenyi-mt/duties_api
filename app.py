@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from models import db, Ksb, Duty
+from models import db, Ksb, Duty, Theme
 import os
 import uuid
 
@@ -111,6 +111,33 @@ def create_app(config_name="default"):
 
       with app.app_context():
             db.create_all()
+
+      @app.get('/themes')
+      def get_all_themes():
+            themes = Theme.query.all()
+            return jsonify([t.to_dict() for t in themes]), 200
+      
+      @app.post('/themes')
+      def post_theme():
+            data = request.json
+            if 'name' not in data or 'description' not in data:
+                  return {"error": "Missing required fields. Request must contain name and description."}, 400
+            try:
+                  new_theme = Theme(name=data["name"], description=data["description"])
+                  db.session.add(new_theme)
+                  db.session.commit()
+                  return jsonify(new_theme.to_dict()), 201
+            except IntegrityError:
+                  db.session.rollback()
+                  return {"error": "A theme with this name already exists."}, 400
+            except ValueError as e:
+                  return {"error": str(e)}, 400
+
+      
+      @app.get('/themes/<string:id>')
+      def get_theme_by_id(id):
+            theme = Theme.query.filter_by(id=id).first_or_404(description=f"Theme with id {id} not found.")
+            return jsonify(theme.to_dict()), 200
 
       return app  
 
