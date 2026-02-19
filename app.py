@@ -1,10 +1,19 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
 from models import db, Ksb, Duty, Theme
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
 import os
+
+limiter = Limiter(key_func=get_remote_address,
+                   default_limits=["200 per day", "50 per hour"],
+                   storage_uri="memory://")
 
 def create_app(config_name="default"):
       app = Flask(__name__)
+      app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+      limiter.init_app(app)
 
       if config_name == "testing":
             app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
