@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apprenticeship Duties</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="column">
+        <h2>Add Duty</h2>
+        {% if error_message %}
+        <div class="error">{{ error_message }}</div>
+        {% endif %}
+        <form method="post" action="/">
+          <label for="number">Duty Number</label>
+          <input id="number" type="number" name="number" required />
+
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="4"></textarea>
+
+          <button type="submit">Add</button>
+        </form>
+      </div>
+
+      <div class="column">
+        <h2>Duties</h2>
+        {% if duties %}
+        <ul>
+          {% for duty in duties %}
+          <li>{{ duty.get_summary() }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>
