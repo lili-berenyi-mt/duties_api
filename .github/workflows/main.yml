@@ -6,27 +6,42 @@ on:
     branches: ["main"]
   workflow_dispatch:
 jobs:
-  unit-tests:
+  backend-unit-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-
       - name: Run pytest
         env:
           DATABASE_URL: ${{ secrets.DB_URL }}
           PYTHONPATH: ${{ github.workspace }}
         run: pytest backend/tests
+
+  frontend-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r frontend/requirements.txt
+      - name: Run pytest
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: pytest frontend/tests
 
   linting:
     runs-on: ubuntu-latest
