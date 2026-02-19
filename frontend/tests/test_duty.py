@@ -1,5 +1,5 @@
 import pytest
-from models import Duty
+from frontend.models import Duty
 
 def test_duty_can_display_name():
     duty = Duty(1, "Test 1")

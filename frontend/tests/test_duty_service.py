@@ -1,5 +1,5 @@
-from services import DutyService, AddDutyResult
-from models import Duty
+from frontend.services import DutyService, AddDutyResult
+from frontend.models import Duty
 
 def test_duty_can_be_added(mocker):
     mock_repo = mocker.Mock()

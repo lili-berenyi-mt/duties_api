@@ -1,5 +1,5 @@
-from models import Duty
-from .results import AddDutyResult
+from frontend.models import Duty
+from frontend.services.results import AddDutyResult
 
 class DutyService:
     def __init__(self, repo):

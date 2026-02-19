@@ -1,5 +1,5 @@
-from repo import DutyRepo
-from services import DutyService, AddDutyResult
+from frontend.repo import DutyRepo
+from frontend.services import DutyService, AddDutyResult
 
 def test_add_duty():
     duty_repo = DutyRepo()
