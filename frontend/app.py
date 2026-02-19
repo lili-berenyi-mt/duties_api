@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from repo.duty_repo import DutyRepo
-from services.duty_service import DutyService
-from services.results import AddDutyResult
+from frontend.repo.duty_repo import DutyRepo
+from frontend.services.duty_service import DutyService
+from frontend.services.results import AddDutyResult
 import os
 
 #type hints
@@ -43,4 +43,4 @@ def index():
     return render_template('index.html', duties=duties, error_message=error_message)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5001)
