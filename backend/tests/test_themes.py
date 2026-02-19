@@ -1,5 +1,5 @@
-from app import create_app
-from models import db
+from backend.app import create_app
+from backend.models import db
 import pytest 
 
 @pytest.fixture

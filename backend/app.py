@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from models import db, Ksb, Duty, Theme
+from backend.models import db, Ksb, Duty, Theme
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.middleware.proxy_fix import ProxyFix
