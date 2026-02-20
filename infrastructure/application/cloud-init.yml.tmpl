@@ -41,7 +41,7 @@ runcmd:
     --name duties-api \
     --restart always \
     -e DATABASE_URL="${database_url}" \
-    docker.io/${docker_username}/duties-api:latest
+    docker.io/${docker_username}/duties-api-backend:latest
 
   - sudo docker pull ${docker_username}/duties-api-frontend:latest
   - sudo docker stop duties-api-frontend || true
