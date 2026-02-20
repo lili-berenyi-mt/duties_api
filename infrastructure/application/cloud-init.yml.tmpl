@@ -11,29 +11,39 @@ write_files:
       server {
         listen 80;
         server_name _;
-        location / {
-            proxy_pass http://127.0.0.1:5000;
+        location /api/ {
+            proxy_pass http://127.0.0.1:5000/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location / {
+            proxy_pass http://127.0.0.1:5001; 
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
         }
       }
 
 runcmd:
+  - sleep 10
   - ln -s /etc/nginx/sites-available/my-site.conf /etc/nginx/sites-enabled/
   - rm /etc/nginx/sites-enabled/default
   - systemctl restart nginx
-
   - systemctl start docker
   - systemctl enable docker
+  - timeout 60s bash -c 'until docker info >/dev/null 2>&1; do echo "waiting for docker..."; sleep 2; done'
 
-  - sudo docker pull ${docker_username}/duties-api:latest
-  - sudo docker stop duties-api
-  - sudo docker rm duties-api
+  - sudo docker pull ${docker_username}/duties-api-backend:latest
+  - sudo docker stop duties-api-backend || true
+  - sudo docker rm duties-api-backend || true
   - sudo docker run -d \
     -p 5000:5000 \
     --name duties-api \
     --restart always \
     -e DATABASE_URL="${database_url}" \
     docker.io/${docker_username}/duties-api:latest
+
+  - sudo docker pull ${docker_username}/duties-api-frontend:latest
+  - sudo docker stop duties-api-frontend || true
+  - sudo docker rm duties-api-frontend || true
+  - sudo docker run -d -p 5001:5000 --name duties-api-frontend docker.io/${docker_username}/duties-api-frontend:latest

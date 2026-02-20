@@ -69,6 +69,10 @@ resource "aws_instance" "app_server" {
   subnet_id              = data.aws_subnets.default.ids[0]
   vpc_security_group_ids = [aws_security_group.this.id]
   key_name               = "terraform-key"
+  user_data_replace_on_change = true
+  tags = {
+    Name = "duties-api-lili"
+  }
   user_data = templatefile("${path.module}/cloud-init.yml.tmpl", {
     instance_name   = "duties-api-lili"
     docker_username = var.docker_username
