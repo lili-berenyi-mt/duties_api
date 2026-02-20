@@ -38,7 +38,7 @@ runcmd:
   - sudo docker rm duties-api-backend || true
   - sudo docker run -d \
     -p 5000:5000 \
-    --name duties-api \
+    --name duties-api-backend \
     --restart always \
     -e DATABASE_URL="${database_url}" \
     docker.io/${docker_username}/duties-api-backend:latest
