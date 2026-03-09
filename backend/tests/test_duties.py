@@ -91,33 +91,28 @@ def test_creating_duty_with_existing_code_returns_400(client):
     assert "error" in data
     assert data["error"] == "A duty with this code already exists."
 
-def test_can_get_duty_by_id(client):
+def test_can_get_duty_by_code(client):
     duty_data = {"code": "D1", "description": "Test description"}
     post_response = client.post('/duties', json=duty_data)
-    duty = post_response.get_json()
-    duty_id = duty["id"]
-    response = client.get(f"/duties/{duty_id}")
+    response = client.get(f"/duties/D1")
     result = response.get_json()
-    assert result["id"] == duty_id
     assert result["code"] == "D1"
 
 def test_getting_duty_with_invalid_id_returns_404(client):
-    response = client.get("/duties/1234567890")
+    response = client.get("/duties/D9999")
     assert response.status_code == 404
 
 def test_deleting_existing_duty_returns_204(client):
     duty_data = {"code": "D1", "description": "Test description"}
-    duty = client.post("/duties", json=duty_data).get_json()
-    duty_id = duty["id"]
-    response = client.delete(f"/duties/{duty_id}")
+    client.post("/duties", json=duty_data).get_json()
+    response = client.delete(f"/duties/D1")
     assert response.status_code == 204
 
 def test_deleted_duty_should_not_exitst(client):
     duty_data = {"code": "D1", "description": "Test description"}
-    duty = client.post("/duties", json=duty_data).get_json()
-    id = duty["id"]
-    client.delete(f"/duties/{id}")
-    response = client.get(f"/duties/{id}") 
+    client.post("/duties", json=duty_data).get_json()
+    client.delete(f"/duties/D1")
+    response = client.get(f"/duties/D1") 
     assert response.status_code == 404
 
 def test_creating_duty_with_ksbs_returns_201(client):
