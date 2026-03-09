@@ -2,22 +2,18 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from frontend.repo.duty_repo import DutyRepo
 from frontend.services.duty_service import DutyService
 from frontend.services.results import AddDutyResult
+from frontend.services.theme_service import ThemeService
+from frontend.repo.theme_repo import ThemeRepo
 import os
 
-#type hints
-#linting - ruff an mypy
-#Add basic stuff to readme, like create venv
-#pycharm - IDE python instead of vs code
-#pip's garbage
-#use interface for differrnt repos
-#flask blueprints for endpoints
-
-repo = DutyRepo()
-service = DutyService(repo)
+duty_repo = DutyRepo()
+duty_service = DutyService(duty_repo)
+theme_repo = ThemeRepo()
+theme_service = ThemeService(theme_repo)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-app.service = service
+app.service = duty_service
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -27,7 +23,7 @@ def index():
         number = int(number)
         description = request.form.get("description")
 
-        result = service.add(number, description)
+        result = duty_service.add(number, description)
         if result == AddDutyResult.EMPTY_DESCRIPTION:
             session["error"]="Error: Description cannot be empty"
         elif result == AddDutyResult.DUPLICATE:
@@ -35,7 +31,7 @@ def index():
         else:
             session["error"]=None
 
-        duties = service.get_all()
+        duties = duty_service.get_all()
         return redirect(url_for('index'))
 
     duties = app.service.get_all()
@@ -44,11 +40,22 @@ def index():
 
 @app.route("/duty/<code>")
 def duty_detail(code):
-    duty = service.get_by_code(code)
+    duty = duty_service.get_by_code(code)
     if not duty:
         return "Duty not found", 404
         
     return render_template("duty_detail.html", duty=duty)
+
+@app.route("/theme/toggle/<string:theme_id>", methods=["POST"])
+def toggle_theme(theme_id):
+    current_status_str = request.form.get("current_status")
+    current_status = current_status_str == 'True'
+    
+    duty_code = request.form.get("duty_code")
+    
+    theme_service.toggle_completion(theme_id, current_status)
+
+    return redirect(url_for('duty_detail', code=duty_code))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
