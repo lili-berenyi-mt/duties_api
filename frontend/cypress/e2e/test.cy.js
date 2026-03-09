@@ -14,7 +14,7 @@ describe("Should be able to add a duty", () => {
     cy.get("button[type='submit']").click();
 
     cy.url().should("eq", Cypress.config().baseUrl + "/");
-    cy.contains("Duty 1: Test duty");
+    cy.contains("D1: Test duty");
   });
 });
 
@@ -30,8 +30,8 @@ describe("Should be able to add multiple duties", () => {
     cy.get("button[type='submit']").click();
 
     cy.url().should("eq", Cypress.config().baseUrl + "/");
-    cy.contains("Duty 2: Test duty 2");
-    cy.contains("Duty 3: Test duty 3");
+    cy.contains("D2: Test duty 2");
+    cy.contains("D3: Test duty 3");
   });
 });
 

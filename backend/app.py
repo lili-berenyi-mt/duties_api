@@ -10,7 +10,9 @@ limiter = Limiter(key_func=get_remote_address,
                    default_limits=["200 per day", "50 per hour"],
                    storage_uri="memory://")
 
-def create_app(config_name="default"):
+mode = os.getenv("APP_SETTINGS", "default")
+
+def create_app(config_name=mode):
       app = Flask(__name__)
       app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
       limiter.init_app(app)
@@ -99,7 +101,7 @@ def create_app(config_name="default"):
                   return jsonify(new_duty.to_dict()), 201
             except IntegrityError:
                   db.session.rollback()
-                  return {"error": "A duty with this code already exists."}, 400
+                  return {"error": "A duty with this code already exists."}, 409
             except ValueError as e:
                   return {"error": str(e)}, 400
             
