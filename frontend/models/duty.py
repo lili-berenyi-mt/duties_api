@@ -1,15 +1,15 @@
 class Duty:
-    def __init__(self, number, description):
+    def __init__(self, code, description):
         if not description:
             raise ValueError("Description cannot be empty")
-        self.number = number
+        self.code = code
         self.description = description
 
-    def get_name(self):
-        return f"Duty {self.number}"
+    def get_code(self):
+        return self.code
     
     def get_summary(self):
-        return f"{self.get_name()}: {self.description}"
+        return f"{self.get_code()}: {self.description}"
     
     def equals(self, other):
-        return self.number == other.number
+        return self.code == other.code

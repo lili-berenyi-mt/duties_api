@@ -11,11 +11,14 @@ class DutyService:
         except ValueError:
             return AddDutyResult.EMPTY_DESCRIPTION
         
-        duties = self.repo.get_all()
-        if any(duty.equals(new_duty) for duty in duties):
+        response = self.repo.add(new_duty)
+        if response == "SUCCESS":
+            return AddDutyResult.SUCCESS
+        elif response == "DUPLICATE":
             return AddDutyResult.DUPLICATE
-        self.repo.add(Duty(number, description))
-        return AddDutyResult.SUCCESS
+        elif response == "CONNECTION_FAILURE":
+            return AddDutyResult.ERROR 
+        return AddDutyResult.ERROR
     
     def get_all(self):
         return self.repo.get_all()
