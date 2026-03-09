@@ -82,12 +82,12 @@ def test_creating_duty_with_invalid_description_returns_400(client):
     assert data["error"] == "Description must be a non-empty string under 255 characters."
 
 
-def test_creating_duty_with_existing_code_returns_400(client):
+def test_creating_duty_with_existing_code_returns_409(client):
     duty_data = {"code": "D1", "description": "Test description"}
     client.post("/duties", json=duty_data)
     response = client.post("/duties", json=duty_data)
     data = response.get_json()
-    assert response.status_code == 400
+    assert response.status_code == 409
     assert "error" in data
     assert data["error"] == "A duty with this code already exists."
 
