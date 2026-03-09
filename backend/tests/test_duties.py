@@ -173,7 +173,8 @@ def test_get_reverse_lookup_duties_returns_one_theme(client):
     assert response.status_code == 200
     data = response.get_json()
     assert data["duty"] == "D1"
-    assert "Theme 1" in data["themes"]
+    theme_names = [t["name"] for t in data["themes"]]
+    assert "Theme 1" in theme_names
 
 def test_get_reverse_lookup_invalid_duty_returns_404(client):
     response = client.get("/duties/search/D1")
@@ -202,5 +203,6 @@ def test_get_reverse_lookup_duties_returns_multiple_themes(client):
     assert response.status_code == 200
     data = response.get_json()
     assert data["duty"] == "D1"
-    assert "Theme 1" in data["themes"]
-    assert "Theme 2" in data["themes"]
+    theme_names = [t["name"] for t in data["themes"]]
+    assert "Theme 1" in theme_names
+    assert "Theme 2" in theme_names

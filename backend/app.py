@@ -162,8 +162,14 @@ def create_app(config_name="default"):
       @app.get('/duties/search/<string:code>')
       def get_themes_by_duty_code(code):
             duty = Duty.query.filter_by(code=code).first_or_404(description=f"Duty with code '{code}' not found.")
-            themes = [t.name for t in duty.themes]
-            return jsonify({"duty": code, "description": duty.description, "themes": themes}), 200
+            themes_data = [
+                  {
+                        "id": t.id, 
+                        "name": t.name, 
+                        "completed": t.completed
+                  } for t in duty.themes
+            ]
+            return jsonify({"duty": code, "description": duty.description, "themes": themes_data}), 200
       
       @app.route('/themes/<string:id>', methods=['PUT'])
       def update_theme(id):
