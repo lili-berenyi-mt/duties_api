@@ -29,16 +29,19 @@ def test_repo_get_by_code_maps_themes(mocker):
     mock_response.status_code = 200
 
     mock_response.json.return_value = {
-        "duty": "D5",
-        "description": "Test 1", 
-        "themes": ["Example1", "Example2"]
+        "duty": "D1",
+        "description": "Test 1",
+        "themes": [
+            {"id": "1", "name": "Theme1", "completed": False}
+        ]
     }
     mock_get.return_value = mock_response
 
     repo = DutyRepo()
 
-    result = repo.get_by_code("D5")
+    result = repo.get_by_code("D1")
 
-    assert result.code == "D5"
-    assert result.themes == ["Example1", "Example2"]
-    assert "/duties/search/D5" in mock_get.call_args[0][0]
+    assert result.code == "D1"
+    assert result.themes[0]["name"] == "Theme1"
+    assert result.themes[0]["id"] == "1"
+    assert "/duties/search/D1" in mock_get.call_args[0][0]
