@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -30,7 +30,11 @@
         {% if duties %}
         <ul>
           {% for duty in duties %}
-          <li>{{ duty.get_summary() }}</li>
+          <li>
+            <a href="{{ url_for('duty_detail', code=duty.code) }}">
+              {{ duty.get_summary() }}
+            </a>
+          </li>
           {% endfor %}
         </ul>
         {% endif %}

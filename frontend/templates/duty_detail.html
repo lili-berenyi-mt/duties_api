@@ -1,0 +1,15 @@
+<h1>Duty {{ duty.code }}</h1>
+<p>{{ duty.description }}</p>
+
+<h3>Associated Themes</h3>
+{% if duty.themes %}
+<ul>
+  {% for theme in duty.themes %}
+  <li>{{ theme }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No themes currently associated with this duty.</p>
+{% endif %}
+
+<a href="/">Back</a>

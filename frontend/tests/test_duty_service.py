@@ -61,3 +61,14 @@ def test_returns_empty_list_when_no_duties(mock_repo, duty_service):
     result = duty_service.get_all()
 
     assert result == []
+
+def test_get_by_code_returns_duty_with_coins(duty_service, mock_repo):
+    duty = Duty("D5", "Test Description")
+    duty.themes = ["Example1", "Example2"]
+    mock_repo.get_by_code.return_value = duty
+
+    result = duty_service.get_by_code("D5")
+
+    assert result.code == "D5"
+    assert "Example1" in result.themes
+    assert len(result.themes) == 2

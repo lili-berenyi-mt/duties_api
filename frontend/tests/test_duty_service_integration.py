@@ -22,3 +22,23 @@ def test_integration_api_down_returns_error(duty_service, mock_post):
     mock_post.side_effect = requests.exceptions.ConnectionError()
     result = duty_service.add(1, "test")
     assert result == AddDutyResult.ERROR
+
+def test_repo_get_by_code_maps_themes(mocker):
+    mock_get = mocker.patch('requests.get')
+    mock_response = mocker.Mock()
+    mock_response.status_code = 200
+
+    mock_response.json.return_value = {
+        "duty": "D5",
+        "description": "Test 1", 
+        "themes": ["Example1", "Example2"]
+    }
+    mock_get.return_value = mock_response
+
+    repo = DutyRepo()
+
+    result = repo.get_by_code("D5")
+
+    assert result.code == "D5"
+    assert result.themes == ["Example1", "Example2"]
+    assert "/duties/search/D5" in mock_get.call_args[0][0]

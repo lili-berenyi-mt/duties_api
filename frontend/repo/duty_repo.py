@@ -34,3 +34,17 @@ class DutyRepo:
         except Exception as e:
             print(f"API Error: {e}")
             return []
+        
+    def get_by_code(self, code):
+        try:
+            response = requests.get(f"{self.api_url}/duties/search/{code}")
+            if response.status_code == 200:
+                data = response.json()
+                duty = Duty(data['duty'], data["description"])
+                duty.themes = data.get('themes', []) 
+                return duty
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"Database/API Connection Error: {e}")
+            return None
+    

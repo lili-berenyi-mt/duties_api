@@ -42,5 +42,13 @@ def index():
     error_message = session.pop("error", None)
     return render_template('index.html', duties=duties, error_message=error_message)
 
+@app.route("/duty/<code>")
+def duty_detail(code):
+    duty = service.get_by_code(code)
+    if not duty:
+        return "Duty not found", 404
+        
+    return render_template("duty_detail.html", duty=duty)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

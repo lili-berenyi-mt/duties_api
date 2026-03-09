@@ -11,5 +11,8 @@ class Duty:
     def get_summary(self):
         return f"{self.get_code()}: {self.description}"
     
+    def get_description(self):
+        return self.description
+    
     def equals(self, other):
         return self.code == other.code
