@@ -162,3 +162,33 @@ def test_creating_theme_with_invalid_duty_data_returns_400(client):
     }
     response = client.post("/themes", json=theme_data)
     assert response.status_code == 400 
+
+def test_put_theme_status(client):
+    theme_data = {
+        "name": "Theme 1",
+        "description": "Test description",
+        "completed": False
+    }
+    post_response = client.post("/themes", json=theme_data)
+    assert post_response.status_code == 201 
+    
+    theme_id = post_response.get_json()["id"]
+
+    put_response = client.put(
+        f'/themes/{theme_id}',
+        json={"completed": True}
+    )
+    assert put_response.status_code == 200
+
+    get_response = client.get(f"/themes/{theme_id}") 
+    assert get_response.status_code == 200
+    
+    updated_data = get_response.get_json()
+    assert updated_data["completed"] is True
+
+# def test_put_theme_invalid_id(client):
+#     # Act: Try to update a theme that doesn't exist
+#     response = client.put('/themes/9999', json={"completed": True})
+    
+#     # Assert
+#     assert response.status_code == 404

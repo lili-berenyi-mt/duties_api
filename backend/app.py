@@ -165,6 +165,16 @@ def create_app(config_name="default"):
             themes = [t.name for t in duty.themes]
             return jsonify({"duty": code, "description": duty.description, "themes": themes}), 200
       
+      @app.route('/themes/<string:id>', methods=['PUT'])
+      def update_theme(id):
+            theme = Theme.query.filter_by(id=id).first_or_404(description=f"Theme with id '{id}' not found.")
+            data = request.get_json()
+            if 'completed' in data:
+                  theme.completed = data['completed']
+
+            db.session.commit()
+            return jsonify({"id": theme.id, "name": theme.name, "completed": theme.completed}), 200
+      
       with app.app_context():
             db.create_all()
 

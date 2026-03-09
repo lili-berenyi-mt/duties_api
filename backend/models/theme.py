@@ -16,6 +16,7 @@ class Theme(db.Model):
     id = db.Column(db.String(36), default=lambda: str(uuid.uuid4()), primary_key=True)
     name = db.Column('name', db.String(255), nullable=False, unique=True)
     description = db.Column('description', db.String(255), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
     duties = db.relationship('Duty', secondary=theme_duty, backref='themes')
 
     @validates('name')
@@ -35,7 +36,8 @@ class Theme(db.Model):
             "id": self.id,
             "name": self.name,
             "description": self.description,
-            "duties": [duty.code for duty in self.duties]
+            "duties": [duty.code for duty in self.duties],
+            "completed": self.completed
         }
     
     
