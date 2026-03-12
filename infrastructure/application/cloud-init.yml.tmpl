@@ -24,28 +24,43 @@ write_files:
         }
       }
 
+  - path: /home/ec2-user/app/docker-compose.yml
+    permissions: "0644"
+    content: |
+      services:
+        backend:
+          image: docker.io/${docker_username}/duties-api-backend:latest
+          container_name: duties-api-backend
+          ports:
+            - "5000:5000"
+          restart: always
+          environment:
+            - DATABASE_URL=${database_url}
+
+        frontend:
+          image: docker.io/${docker_username}/duties-api-frontend:latest
+          container_name: duties-api-frontend
+          ports:
+            - "5001:5000"
+          restart: always
+          environment:
+            - BACKEND_URL=http://backend:5000
+          depends_on:
+            - backend
+
 runcmd:
-  - sleep 10
   - ln -sf /etc/nginx/sites-available/my-site.conf /etc/nginx/sites-enabled/
   - rm -f /etc/nginx/sites-enabled/default
   - systemctl restart nginx
+
   - systemctl start docker
   - systemctl enable docker
-  - timeout 60s bash -c 'until docker info >/dev/null 2>&1; do echo "waiting for docker..."; sleep 2; done'
+  - usermod -aG docker ec2-user
 
-  - |
-    for i in {1..5}; do docker pull ${docker_username}/duties-api-backend:latest && break || sleep 10; done
-  - sudo docker stop duties-api-backend || true
-  - sudo docker rm duties-api-backend || true
-  - sudo docker run -d \
-    -p 5000:5000 \
-    --name duties-api-backend \
-    --restart always \
-    -e DATABASE_URL="${database_url}" \
-    docker.io/${docker_username}/duties-api-backend:latest
+  - mkdir -p /usr/libexec/docker/cli-plugins
+  - curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m) -o /usr/libexec/docker/cli-plugins/docker-compose
+  - chmod +x /usr/libexec/docker/cli-plugins/docker-compose
 
-  - |
-    for i in {1..5}; do docker pull ${docker_username}/duties-api-frontend:latest && break || sleep 10; done
-  - sudo docker stop duties-api-frontend || true
-  - sudo docker rm duties-api-frontend || true
-  - sudo docker run -d -p 5001:5000 --name duties-api-frontend docker.io/${docker_username}/duties-api-frontend:latest
+  - timeout 60s bash -c 'until docker info >/dev/null 2>&1; do sleep 2; done'
+  - cd /home/ec2-user/app && docker compose pull
+  - cd /home/ec2-user/app && docker compose up -d
