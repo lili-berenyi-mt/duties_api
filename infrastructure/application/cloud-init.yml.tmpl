@@ -31,8 +31,8 @@ write_files:
         backend:
           image: docker.io/${docker_username}/duties-api-backend:latest
           container_name: duties-api-backend
-          ports:
-            - "5000:5000"
+          expose:
+            - "5000"
           restart: always
           environment:
             - DATABASE_URL=${database_url}
