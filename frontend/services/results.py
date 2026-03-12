@@ -4,3 +4,4 @@ class AddDutyResult(Enum):
     EMPTY_DESCRIPTION = 2
     DUPLICATE = 3
     ERROR = 4
+    INVALID_INPUT = 5

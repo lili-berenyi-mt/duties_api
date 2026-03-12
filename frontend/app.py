@@ -28,6 +28,8 @@ def index():
             session["error"]="Error: Description cannot be empty"
         elif result == AddDutyResult.DUPLICATE:
             session["error"]="Error: Duty already exists"
+        elif result == AddDutyResult.INVALID_INPUT:
+            session["error"]="Error: Number must be a number"
         else:
             session["error"]=None
 

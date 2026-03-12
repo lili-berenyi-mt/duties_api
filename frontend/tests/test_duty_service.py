@@ -72,3 +72,8 @@ def test_get_by_code_returns_duty_with_coins(duty_service, mock_repo):
     assert result.code == "D5"
     assert "Example1" in result.themes
     assert len(result.themes) == 2
+
+def test_cannot_add_duty_with_non_numeric_number(duty_service, mock_repo):
+    result = duty_service.add(number="one", description="test1")
+    assert result == AddDutyResult.INVALID_INPUT
+    

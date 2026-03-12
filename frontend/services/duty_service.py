@@ -11,6 +11,11 @@ class DutyService:
         except ValueError:
             return AddDutyResult.EMPTY_DESCRIPTION
         
+        try:
+            number = int(number)
+        except:
+            return AddDutyResult.INVALID_INPUT
+        
         response = self.repo.add(new_duty)
         if response == "SUCCESS":
             return AddDutyResult.SUCCESS
