@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from backend.models import db, Ksb, Duty, Theme
+from backend.models import db, Ksb, Duty, Theme, User
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -182,6 +182,22 @@ def create_app(config_name=mode):
 
             db.session.commit()
             return jsonify({"id": theme.id, "name": theme.name, "completed": theme.completed}), 200
+      
+      @app.route('/verify-login', methods = ["POST"])
+      def verify_login():
+            data = request.get_json()
+            username = data.get('username')
+            password = data.get('password')
+            user = User.query.filter_by(username=username).first()
+
+            if user and user.check_password(password):
+                  return jsonify({
+                        "id": user.id,
+                        "role": user.role,
+                        "username": user.username
+                  }), 200
+            return jsonify({"error": "Invalid username or password"}), 401
+
       
       with app.app_context():
             db.create_all()
