@@ -11,7 +11,7 @@ def client():
 def test_frontend_login_sets_session_on_backend_success(client, mocker):
     mock_response = mocker.Mock()
     mock_response.status_code = 200
-    mock_response.json.return_value = {"user_id": 1, "role": "user", "username": "user"}
+    mock_response.json.return_value = {"id": 1, "role": "user", "username": "user"}
 
     mocker.patch('requests.post', return_value=mock_response)
 
