@@ -10,7 +10,7 @@ class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.String(36), default=lambda: str(uuid.uuid4()), primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=True)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(256))
     role = db.Column(db.String(20))
 
     def set_password(self, password):
