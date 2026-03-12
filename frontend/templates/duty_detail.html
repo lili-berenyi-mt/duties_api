@@ -22,9 +22,15 @@
         name="current_status"
         value="{{ theme.completed }}"
       />
-      <button type="submit">
+      {% if session.get('id') %}
+      <button type="submit" class="btn btn-primary">
         {{ "Mark Incomplete" if theme.completed else "Mark Complete" }}
       </button>
+      {% else %}
+      <button type="button" class="btn btn-disabled" disabled>
+        Login to Edit
+      </button>
+      {% endif %}
     </form>
   </li>
   {% endfor %}

@@ -56,7 +56,8 @@ def toggle_theme(theme_id):
     
     duty_code = request.form.get("duty_code")
     
-    theme_service.toggle_completion(theme_id, current_status)
+    user_role = session.get("role")
+    theme_service.toggle_completion(theme_id, current_status, user_role)
 
     return redirect(url_for('duty_detail', code=duty_code))
 
@@ -69,9 +70,9 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         session["login-error"] = None
-
+        BACKEND_URL = os.environ.get('BACKEND_URL', 'http://localhost:5000')
         try:
-            resp = requests.post("http://backend:5000/verify-login", 
+            resp = requests.post(f"{BACKEND_URL}/verify-login", 
                                  json={"username": username, "password": password},
                                  timeout=5)
 
