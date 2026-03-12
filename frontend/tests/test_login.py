@@ -18,7 +18,7 @@ def test_frontend_login_sets_session_on_backend_success(client, mocker):
     client.post('/login', data={'username': 'user', 'password': 'password'})
 
     with client.session_transaction() as session:
-        assert session['user_id'] == 1
+        assert session['id'] == 1
         assert session['role'] == 'user'
 
 def test_login_shows_error_message_on_wrong_credentials(client, mocker):
