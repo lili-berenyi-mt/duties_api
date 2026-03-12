@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from models import db, Ksb, Duty, Theme
+from backend.models import db, Ksb, Duty, Theme
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -10,7 +10,9 @@ limiter = Limiter(key_func=get_remote_address,
                    default_limits=["200 per day", "50 per hour"],
                    storage_uri="memory://")
 
-def create_app(config_name="default"):
+mode = os.getenv("APP_SETTINGS", "default")
+
+def create_app(config_name=mode):
       app = Flask(__name__)
       app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
       limiter.init_app(app)
@@ -99,18 +101,18 @@ def create_app(config_name="default"):
                   return jsonify(new_duty.to_dict()), 201
             except IntegrityError:
                   db.session.rollback()
-                  return {"error": "A duty with this code already exists."}, 400
+                  return {"error": "A duty with this code already exists."}, 409
             except ValueError as e:
                   return {"error": str(e)}, 400
             
-      @app.get('/duties/<string:id>')
-      def get_duty_by_id(id):
-            duty = Duty.query.filter_by(id=id).first_or_404(description=f"Duty with id {id} not found.")
+      @app.get('/duties/<string:code>')
+      def get_duty_by_code(code):
+            duty = Duty.query.filter_by(code=code).first_or_404(description=f"Duty with code {code} not found.")
             return jsonify(duty.to_dict()), 200
       
-      @app.delete('/duties/<string:id>')
-      def delete_duty_by_id(id):
-            duty = Duty.query.filter_by(id=id).first_or_404(description=f"Duty with id {id} not found.")
+      @app.delete('/duties/<string:code>')
+      def delete_duty_by_code(code):
+            duty = Duty.query.filter_by(code=code).first_or_404(description=f"Duty with code {code} not found.")
             db.session.delete(duty)
             db.session.commit()     
             return "", 204
@@ -162,8 +164,24 @@ def create_app(config_name="default"):
       @app.get('/duties/search/<string:code>')
       def get_themes_by_duty_code(code):
             duty = Duty.query.filter_by(code=code).first_or_404(description=f"Duty with code '{code}' not found.")
-            themes = [t.name for t in duty.themes]
-            return jsonify({"duty": code, "themes": themes}), 200
+            themes_data = [
+                  {
+                        "id": t.id, 
+                        "name": t.name, 
+                        "completed": t.completed
+                  } for t in duty.themes
+            ]
+            return jsonify({"duty": code, "description": duty.description, "themes": themes_data}), 200
+      
+      @app.route('/themes/<string:id>', methods=['PUT'])
+      def update_theme(id):
+            theme = Theme.query.filter_by(id=id).first_or_404(description=f"Theme with id '{id}' not found.")
+            data = request.get_json()
+            if 'completed' in data:
+                  theme.completed = data['completed']
+
+            db.session.commit()
+            return jsonify({"id": theme.id, "name": theme.name, "completed": theme.completed}), 200
       
       with app.app_context():
             db.create_all()

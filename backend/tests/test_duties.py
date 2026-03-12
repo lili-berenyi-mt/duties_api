@@ -1,5 +1,5 @@
-from app import create_app
-from models import db
+from backend.app import create_app
+from backend.models import db
 import pytest 
 
 @pytest.fixture
@@ -82,42 +82,37 @@ def test_creating_duty_with_invalid_description_returns_400(client):
     assert data["error"] == "Description must be a non-empty string under 255 characters."
 
 
-def test_creating_duty_with_existing_code_returns_400(client):
+def test_creating_duty_with_existing_code_returns_409(client):
     duty_data = {"code": "D1", "description": "Test description"}
     client.post("/duties", json=duty_data)
     response = client.post("/duties", json=duty_data)
     data = response.get_json()
-    assert response.status_code == 400
+    assert response.status_code == 409
     assert "error" in data
     assert data["error"] == "A duty with this code already exists."
 
-def test_can_get_duty_by_id(client):
+def test_can_get_duty_by_code(client):
     duty_data = {"code": "D1", "description": "Test description"}
     post_response = client.post('/duties', json=duty_data)
-    duty = post_response.get_json()
-    duty_id = duty["id"]
-    response = client.get(f"/duties/{duty_id}")
+    response = client.get(f"/duties/D1")
     result = response.get_json()
-    assert result["id"] == duty_id
     assert result["code"] == "D1"
 
 def test_getting_duty_with_invalid_id_returns_404(client):
-    response = client.get("/duties/1234567890")
+    response = client.get("/duties/D9999")
     assert response.status_code == 404
 
 def test_deleting_existing_duty_returns_204(client):
     duty_data = {"code": "D1", "description": "Test description"}
-    duty = client.post("/duties", json=duty_data).get_json()
-    duty_id = duty["id"]
-    response = client.delete(f"/duties/{duty_id}")
+    client.post("/duties", json=duty_data).get_json()
+    response = client.delete(f"/duties/D1")
     assert response.status_code == 204
 
 def test_deleted_duty_should_not_exitst(client):
     duty_data = {"code": "D1", "description": "Test description"}
-    duty = client.post("/duties", json=duty_data).get_json()
-    id = duty["id"]
-    client.delete(f"/duties/{id}")
-    response = client.get(f"/duties/{id}") 
+    client.post("/duties", json=duty_data).get_json()
+    client.delete(f"/duties/D1")
+    response = client.get(f"/duties/D1") 
     assert response.status_code == 404
 
 def test_creating_duty_with_ksbs_returns_201(client):
@@ -178,7 +173,8 @@ def test_get_reverse_lookup_duties_returns_one_theme(client):
     assert response.status_code == 200
     data = response.get_json()
     assert data["duty"] == "D1"
-    assert "Theme 1" in data["themes"]
+    theme_names = [t["name"] for t in data["themes"]]
+    assert "Theme 1" in theme_names
 
 def test_get_reverse_lookup_invalid_duty_returns_404(client):
     response = client.get("/duties/search/D1")
@@ -207,5 +203,6 @@ def test_get_reverse_lookup_duties_returns_multiple_themes(client):
     assert response.status_code == 200
     data = response.get_json()
     assert data["duty"] == "D1"
-    assert "Theme 1" in data["themes"]
-    assert "Theme 2" in data["themes"]
+    theme_names = [t["name"] for t in data["themes"]]
+    assert "Theme 1" in theme_names
+    assert "Theme 2" in theme_names

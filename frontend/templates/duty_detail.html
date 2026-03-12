@@ -1,0 +1,36 @@
+<h1>Duty {{ duty.code }}</h1>
+<p>{{ duty.description }}</p>
+
+<h3>Associated Themes</h3>
+{% if duty.themes %}
+<ul>
+  {% for theme in duty.themes %}
+  <li style="margin-bottom: 12px">
+    {{ theme.name }}: {% if theme.completed %}
+    <span style="color: green">✅ Done</span>
+    {% else %}
+    <span style="color: grey">[ ] To Do</span>
+    {% endif %}
+
+    <form
+      action="{{ url_for('toggle_theme', theme_id=theme.id) }}"
+      method="POST"
+    >
+      <input type="hidden" name="duty_code" value="{{ duty.code }}" />
+      <input
+        type="hidden"
+        name="current_status"
+        value="{{ theme.completed }}"
+      />
+      <button type="submit">
+        {{ "Mark Incomplete" if theme.completed else "Mark Complete" }}
+      </button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No themes currently associated with this duty.</p>
+{% endif %}
+
+<a href="/">Back</a>

@@ -21,10 +21,13 @@ class Duty(db.Model):
 
     @validates('code')
     def validate_code(self, key, value):
+        str_value = str(value)
+        if str_value.isdigit():
+            str_value = f"D{str_value}"
         pattern = r"^D\d{1,2}$"
-        if not value or not re.match(pattern, value):
+        if not value or not re.match(pattern, str_value):
             raise ValueError(f"Invalid code '{value}'. Must start with 'D' followed by 1 or 2 digits (e.g., 'D1').")
-        return value
+        return str_value
     
     @validates('description')
     def validate_description(self, key, value):
