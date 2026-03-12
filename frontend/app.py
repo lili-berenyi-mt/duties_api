@@ -71,7 +71,7 @@ def login():
         session["login-error"] = None
 
         try:
-            resp = requests.post("http://localhost:5000/verify-login", 
+            resp = requests.post("http://backend:5000/verify-login", 
                                  json={"username": username, "password": password},
                                  timeout=5)
 
