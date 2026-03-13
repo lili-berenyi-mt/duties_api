@@ -11,6 +11,7 @@ duty_repo = DutyRepo()
 duty_service = DutyService(duty_repo)
 theme_repo = ThemeRepo()
 theme_service = ThemeService(theme_repo)
+BACKEND_URL = os.environ.get('BACKEND_URL', 'http://localhost:5000')
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'secret')
@@ -70,7 +71,7 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         session["login-error"] = None
-        BACKEND_URL = os.environ.get('BACKEND_URL', 'http://localhost:5000')
+        
         try:
             resp = requests.post(f"{BACKEND_URL}/verify-login", 
                                  json={"username": username, "password": password},
@@ -97,6 +98,15 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+@app.route('/admin/delete-duty/<code>', methods=['POST'])
+def delete_duty(code):
+    if session.get('role') != 'admin':
+        from flask import abort
+        abort(403)
+        
+    requests.delete(f"{BACKEND_URL}/duties/{code}")
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

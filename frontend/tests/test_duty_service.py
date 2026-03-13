@@ -76,4 +76,15 @@ def test_get_by_code_returns_duty_with_coins(duty_service, mock_repo):
 def test_cannot_add_duty_with_non_numeric_number(duty_service, mock_repo):
     result = duty_service.add(number="one", description="test1")
     assert result == AddDutyResult.INVALID_INPUT
-    
+
+def test_delete_returns_false_if_not_found(duty_service, mock_repo):
+    mock_repo.delete_by_code.return_value = False
+    result = duty_service.delete_by_code("D404")
+    assert result is False
+    mock_repo.delete_by_code.assert_called_once_with("D404")
+
+def test_delete_returns_true_if_found_and_deleted(duty_service, mock_repo):
+    mock_repo.delete_by_code.return_value = True
+    result = duty_service.delete_by_code("D1")
+    assert result is True
+    mock_repo.delete_by_code.assert_called_once_with("D1")

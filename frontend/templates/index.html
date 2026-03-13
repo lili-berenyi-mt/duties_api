@@ -14,10 +14,19 @@
         {% if duties %}
         <ul>
           {% for duty in duties %}
-          <li>
+          <li class="duty-item">
             <a href="{{ url_for('duty_detail', code=duty.code) }}">
               {{ duty.get_summary() }}
             </a>
+            {% if session.get('role') == 'admin' %}
+            <form
+              action="{{ url_for('delete_duty', code=duty.code) }}"
+              method="post"
+              style="display: inline"
+            >
+              <button type="submit" class="btn-delete">Delete</button>
+            </form>
+            {% endif %}
           </li>
           {% endfor %}
         </ul>

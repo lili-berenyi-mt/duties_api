@@ -38,3 +38,15 @@ def test_admin_features_hidden_from_non_admin(client):
     response = client.get('/')
     assert b"Add Duty" not in response.data
     assert b"Delete" not in response.data
+
+def test_frontend_delete_refused_for_non_admin(client, mocker):
+    with client.session_transaction() as session:
+        session['user'] = 'non_admin'
+        session['role'] = 'user'
+
+    mock_requests = mocker.patch('requests.delete')
+
+    response = client.post('/admin/delete-duty/D10', follow_redirects=True)
+
+    assert response.status_code == 403
+    mock_requests.assert_not_called()

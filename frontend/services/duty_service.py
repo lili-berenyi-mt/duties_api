@@ -30,3 +30,6 @@ class DutyService:
     
     def get_by_code(self, code):
         return self.repo.get_by_code(code)
+    
+    def delete_by_code(self, code):
+        return self.repo.delete_by_code(code)
