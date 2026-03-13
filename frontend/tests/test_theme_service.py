@@ -1,4 +1,4 @@
-from frontend.services import ThemeService, ToggleThemeResult
+from frontend.services import ThemeService, AuthResult
 import pytest 
 
 @pytest.fixture
@@ -18,5 +18,5 @@ def test_authenticated_user_can_toggle_theme(mock_repo, theme_service):
 def test_unauthenticated_user_cannot_toggle_theme(mock_repo, theme_service):
     mock_repo.update_status.return_value = True
     result = theme_service.toggle_completion(theme_id="1", current_status=False, user_role=None)
-    assert result == ToggleThemeResult.UNAUTHORISED
+    assert result == AuthResult.UNAUTHORISED
     mock_repo.save.assert_not_called()

@@ -1,4 +1,4 @@
-from frontend.services import DutyService, AddDutyResult
+from frontend.services import DutyService, AddDutyResult, AuthResult
 from frontend.models import Duty
 import pytest
 
@@ -79,12 +79,18 @@ def test_cannot_add_duty_with_non_numeric_number(duty_service, mock_repo):
 
 def test_delete_returns_false_if_not_found(duty_service, mock_repo):
     mock_repo.delete_by_code.return_value = False
-    result = duty_service.delete_by_code("D404")
+    result = duty_service.delete_by_code("D404", "admin")
     assert result is False
     mock_repo.delete_by_code.assert_called_once_with("D404")
 
 def test_delete_returns_true_if_found_and_deleted(duty_service, mock_repo):
     mock_repo.delete_by_code.return_value = True
-    result = duty_service.delete_by_code("D1")
+    result = duty_service.delete_by_code("D1", "admin")
     assert result is True
     mock_repo.delete_by_code.assert_called_once_with("D1")
+
+def test_unauthenticated_user_cannot_delete_duty(duty_service, mock_repo):
+    mock_repo.delete_by_code.return_value = True
+    result = duty_service.delete_by_code(code="1", user_role=None)
+    assert result == AuthResult.UNAUTHORISED
+    mock_repo.delete_by_code_not_called()

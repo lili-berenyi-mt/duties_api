@@ -6,6 +6,6 @@ class AddDutyResult(Enum):
     ERROR = 4
     INVALID_INPUT = 5
 
-class ToggleThemeResult(Enum):
+class AuthResult(Enum):
     SUCCESS = 1
     UNAUTHORISED = 2

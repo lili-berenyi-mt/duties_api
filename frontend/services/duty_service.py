@@ -1,5 +1,5 @@
 from frontend.models import Duty
-from frontend.services.results import AddDutyResult
+from frontend.services.results import AddDutyResult, AuthResult
 
 class DutyService:
     def __init__(self, repo):
@@ -31,5 +31,7 @@ class DutyService:
     def get_by_code(self, code):
         return self.repo.get_by_code(code)
     
-    def delete_by_code(self, code):
+    def delete_by_code(self, code, user_role):
+        if user_role == None:
+            return AuthResult.UNAUTHORISED
         return self.repo.delete_by_code(code)
