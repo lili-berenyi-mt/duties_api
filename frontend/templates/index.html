@@ -10,6 +10,22 @@
   <body>
     <div class="container">
       <div class="column">
+        <h2>Duties</h2>
+        {% if duties %}
+        <ul>
+          {% for duty in duties %}
+          <li>
+            <a href="{{ url_for('duty_detail', code=duty.code) }}">
+              {{ duty.get_summary() }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      {% if session.get('role') == 'admin' %}
+      <div class="column">
         <h2>Add Duty</h2>
         {% if error_message %}
         <div class="error">{{ error_message }}</div>
@@ -24,21 +40,7 @@
           <button type="submit">Add</button>
         </form>
       </div>
-
-      <div class="column">
-        <h2>Duties</h2>
-        {% if duties %}
-        <ul>
-          {% for duty in duties %}
-          <li>
-            <a href="{{ url_for('duty_detail', code=duty.code) }}">
-              {{ duty.get_summary() }}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-        {% endif %}
-      </div>
+      {% endif %}
     </div>
   </body>
 </html>
