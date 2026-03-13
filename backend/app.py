@@ -7,8 +7,9 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 
 limiter = Limiter(key_func=get_remote_address,
-                   default_limits=["200 per day", "50 per hour"],
+                   default_limits=["200 per day", "10 per minute"],
                    storage_uri="memory://")
+
 
 mode = os.getenv("APP_SETTINGS", "default")
 
@@ -198,7 +199,6 @@ def create_app(config_name=mode):
                   }), 200
             return jsonify({"error": "Invalid username or password"}), 401
 
-      
       with app.app_context():
             db.create_all()
 
