@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from backend.models import db, Ksb, Duty, Theme, User
+from backend.models import db, Ksb, Duty, Theme, User, RequestLog
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -198,6 +198,23 @@ def create_app(config_name=mode):
                         "username": user.username
                   }), 200
             return jsonify({"error": "Invalid username or password"}), 401
+      
+      @app.after_request
+      def log_request(response):
+            if request.path.startswith('/logs'):
+                  return response
+            try:
+                  log = RequestLog(
+                        method=request.method,
+                        path=request.path,
+                        status_code=response.status_code,
+                        remote_address=request.remote_addr
+                  )
+                  db.session.add(log)
+                  db.session.commit()
+            except Exception as e:
+                  db.session.rollback()
+            return response
 
       with app.app_context():
             db.create_all()
