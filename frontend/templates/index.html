@@ -8,7 +8,42 @@
   </head>
 
   <body>
+    <nav class="nav-header" style="margin-bottom: 20px; text-align: right">
+      {% if session.get('username') %}
+      <span>Logged in as: <strong>{{ session.username }}</strong></span>
+      {% if session.get('role') == 'admin' %} |
+      <a href="{{ url_for('view_logs') }}">View Logs</a> {% endif %} |
+      <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+      {% endif %}
+    </nav>
     <div class="container">
+      <div class="column">
+        <h2>Duties</h2>
+        {% if duties %}
+        <ul>
+          {% for duty in duties %}
+          <li class="duty-item">
+            <a href="{{ url_for('duty_detail', code=duty.code) }}">
+              {{ duty.get_summary() }}
+            </a>
+            {% if session.get('role') == 'admin' %}
+            <form
+              action="{{ url_for('delete_duty', code=duty.code) }}"
+              method="post"
+              style="display: inline"
+            >
+              <button type="submit" class="btn-delete">Delete</button>
+            </form>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      {% if session.get('role') == 'admin' %}
       <div class="column">
         <h2>Add Duty</h2>
         {% if error_message %}
@@ -24,21 +59,7 @@
           <button type="submit">Add</button>
         </form>
       </div>
-
-      <div class="column">
-        <h2>Duties</h2>
-        {% if duties %}
-        <ul>
-          {% for duty in duties %}
-          <li>
-            <a href="{{ url_for('duty_detail', code=duty.code) }}">
-              {{ duty.get_summary() }}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-        {% endif %}
-      </div>
+      {% endif %}
     </div>
   </body>
 </html>

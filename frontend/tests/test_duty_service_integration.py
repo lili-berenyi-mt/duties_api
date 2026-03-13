@@ -15,12 +15,12 @@ def duty_service():
 
 def test_integration_api_conflict_returns_duplicate(duty_service, mock_post):
     mock_post.return_value.status_code = 409
-    result = duty_service.add(1, "test")
+    result = duty_service.add(1, "test", "admin")
     assert result == AddDutyResult.DUPLICATE
 
 def test_integration_api_down_returns_error(duty_service, mock_post):
     mock_post.side_effect = requests.exceptions.ConnectionError()
-    result = duty_service.add(1, "test")
+    result = duty_service.add(1, "test", "admin")
     assert result == AddDutyResult.ERROR
 
 def test_repo_get_by_code_maps_themes(mocker):

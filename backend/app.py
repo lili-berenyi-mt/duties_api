@@ -1,20 +1,21 @@
 from flask import Flask, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from backend.models import db, Ksb, Duty, Theme
+from backend.models import db, Ksb, Duty, Theme, User, RequestLog
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 
 limiter = Limiter(key_func=get_remote_address,
-                   default_limits=["200 per day", "50 per hour"],
+                   default_limits=["200 per day", "10 per minute"],
                    storage_uri="memory://")
+
 
 mode = os.getenv("APP_SETTINGS", "default")
 
 def create_app(config_name=mode):
       app = Flask(__name__)
-      app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+      app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
       limiter.init_app(app)
 
       if config_name == "testing":
@@ -183,6 +184,43 @@ def create_app(config_name=mode):
             db.session.commit()
             return jsonify({"id": theme.id, "name": theme.name, "completed": theme.completed}), 200
       
+      @app.route('/verify-login', methods = ["POST"])
+      def verify_login():
+            data = request.get_json()
+            username = data.get('username')
+            password = data.get('password')
+            user = User.query.filter_by(username=username).first()
+
+            if user and user.check_password(password):
+                  return jsonify({
+                        "id": user.id,
+                        "role": user.role,
+                        "username": user.username
+                  }), 200
+            return jsonify({"error": "Invalid username or password"}), 401
+      
+      @app.after_request
+      def log_request(response):
+            if request.path.startswith('/logs'):
+                  return response
+            try:
+                  log = RequestLog(
+                        method=request.method,
+                        path=request.path,
+                        status_code=response.status_code,
+                        remote_address=request.remote_addr
+                  )
+                  db.session.add(log)
+                  db.session.commit()
+            except Exception as e:
+                  db.session.rollback()
+            return response
+      
+      @app.get('/logs')
+      def get_logs():
+            logs = RequestLog.query.order_by(RequestLog.timestamp.desc()).limit(100).all()
+            return jsonify([log.to_dict() for log in logs]), 200
+
       with app.app_context():
             db.create_all()
 

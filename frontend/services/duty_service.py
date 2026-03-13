@@ -1,11 +1,13 @@
 from frontend.models import Duty
-from frontend.services.results import AddDutyResult
+from frontend.services.results import AddDutyResult, AuthResult
 
 class DutyService:
     def __init__(self, repo):
         self.repo = repo
 
-    def add(self, number, description):
+    def add(self, number, description, user_role):
+        if user_role != "admin":
+            return AuthResult.UNAUTHORISED
         try:
             new_duty = Duty(number, description)
         except ValueError:
@@ -30,3 +32,8 @@ class DutyService:
     
     def get_by_code(self, code):
         return self.repo.get_by_code(code)
+    
+    def delete_by_code(self, code, user_role):
+        if user_role != "admin":
+            return AuthResult.UNAUTHORISED
+        return self.repo.delete_by_code(code)

@@ -5,3 +5,7 @@ class AddDutyResult(Enum):
     DUPLICATE = 3
     ERROR = 4
     INVALID_INPUT = 5
+
+class AuthResult(Enum):
+    SUCCESS = 1
+    UNAUTHORISED = 2

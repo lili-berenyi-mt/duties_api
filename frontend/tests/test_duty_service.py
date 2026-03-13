@@ -1,4 +1,4 @@
-from frontend.services import DutyService, AddDutyResult
+from frontend.services import DutyService, AddDutyResult, AuthResult
 from frontend.models import Duty
 import pytest
 
@@ -13,7 +13,7 @@ def duty_service(mock_repo):
 def test_duty_can_be_added(mock_repo, duty_service):
     mock_repo.get_all.return_value = []
     mock_repo.add.return_value = "SUCCESS"
-    result = duty_service.add(number=1, description="test")
+    result = duty_service.add(number=1, description="test", user_role="admin")
 
     mock_repo.add.assert_called_once()
     assert result == AddDutyResult.SUCCESS
@@ -22,8 +22,8 @@ def test_can_add_multiple_duties(mock_repo, duty_service):
     mock_repo.get_all.return_value = []
     mock_repo.add.return_value = "SUCCESS"
 
-    result1 = duty_service.add(1, "Test1")
-    result2 = duty_service.add(2, "Test2")
+    result1 = duty_service.add(1, "Test1", "admin")
+    result2 = duty_service.add(2, "Test2", "admin")
 
     assert result1 == AddDutyResult.SUCCESS
     assert result2 == AddDutyResult.SUCCESS
@@ -31,7 +31,7 @@ def test_can_add_multiple_duties(mock_repo, duty_service):
 
 def test_duplicate_duty_cannot_be_added(mock_repo, duty_service):
     mock_repo.add.return_value = "DUPLICATE"
-    result = duty_service.add(number=1, description="test2")
+    result = duty_service.add(1, "test2", "admin")
 
     assert mock_repo.add.call_count == 1
     assert result == AddDutyResult.DUPLICATE
@@ -39,7 +39,7 @@ def test_duplicate_duty_cannot_be_added(mock_repo, duty_service):
 def test_duty_with_empty_description_cannot_be_added(mock_repo, duty_service):
     mock_repo.get_all.return_value = []
 
-    result = duty_service.add(1,"")
+    result = duty_service.add(1,"","admin")
 
     assert mock_repo.add.call_count == 0
     assert result == AddDutyResult.EMPTY_DESCRIPTION
@@ -74,6 +74,41 @@ def test_get_by_code_returns_duty_with_coins(duty_service, mock_repo):
     assert len(result.themes) == 2
 
 def test_cannot_add_duty_with_non_numeric_number(duty_service, mock_repo):
-    result = duty_service.add(number="one", description="test1")
+    result = duty_service.add(number="one", description="test1", user_role="admin")
     assert result == AddDutyResult.INVALID_INPUT
-    
+
+def test_delete_returns_false_if_not_found(duty_service, mock_repo):
+    mock_repo.delete_by_code.return_value = False
+    result = duty_service.delete_by_code("D404", "admin")
+    assert result is False
+    mock_repo.delete_by_code.assert_called_once_with("D404")
+
+def test_delete_returns_true_if_found_and_deleted(duty_service, mock_repo):
+    mock_repo.delete_by_code.return_value = True
+    result = duty_service.delete_by_code("D1", "admin")
+    assert result is True
+    mock_repo.delete_by_code.assert_called_once_with("D1")
+
+def test_unauthenticated_user_cannot_delete_duty(duty_service, mock_repo):
+    mock_repo.delete_by_code.return_value = True
+    result = duty_service.delete_by_code(code="1", user_role=None)
+    assert result == AuthResult.UNAUTHORISED
+    mock_repo.delete_by_code_not_called()
+
+def test_unauthorised_user_cannot_delete_duty(duty_service, mock_repo):
+    mock_repo.delete_by_code.return_value = True
+    result = duty_service.delete_by_code(code="1", user_role="user")
+    assert result == AuthResult.UNAUTHORISED
+    mock_repo.delete_by_code_not_called()
+
+def test_unauthenticated_user_cannot_add_duty(duty_service, mock_repo):
+    mock_repo.delete_by_code.return_value = True
+    result = duty_service.add(number="1", description="test1", user_role="user")
+    assert result == AuthResult.UNAUTHORISED
+    mock_repo.delete_by_code_not_called()
+
+def test_unauthorised_user_cannot_add_duty(duty_service, mock_repo):
+    mock_repo.delete_by_code.return_value = True
+    result = duty_service.add(number="1", description="test1", user_role="user")
+    assert result == AuthResult.UNAUTHORISED
+    mock_repo.delete_by_code_not_called()

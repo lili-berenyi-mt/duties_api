@@ -9,3 +9,5 @@ db = SQLAlchemy(model_class=Base)
 from .ksb import Ksb
 from .duty import Duty
 from .theme import Theme
+from .user import User
+from .request_log import RequestLog

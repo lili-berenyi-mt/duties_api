@@ -48,3 +48,9 @@ class DutyRepo:
             print(f"Database/API Connection Error: {e}")
             return None
     
+    def delete_by_code(self, code):
+        try:
+            response = requests.delete(f"{self.api_url}/duties/{code}")
+        except requests.exceptions.RequestException as e:
+            print(f"Database/API Connection Error: {e}")
+            return False

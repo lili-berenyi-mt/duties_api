@@ -1,0 +1,23 @@
+<h1>Logs</h1>
+<p>Last 100 requests</p>
+
+{% if logs %}
+<ul>
+  {% for log in logs %}
+  <li>
+    [{{ log.timestamp }}]
+    <strong>{{ log.method }}</strong>
+    {{ log.path }} -
+    <strong>{{ log.status_code }}</strong>
+    ({{ log.remote_address }}) {% if log.status_code == 429 %} [RATE LIMIT
+    ACTIVE] {% endif %} {% if log.status_code == 403 %} [ACCESS DENIED] {% endif
+    %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No activity logged yet.</p>
+{% endif %}
+
+<hr />
+<a href="/">Back to Home</a>
