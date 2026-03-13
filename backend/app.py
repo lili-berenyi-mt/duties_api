@@ -215,6 +215,11 @@ def create_app(config_name=mode):
             except Exception as e:
                   db.session.rollback()
             return response
+      
+      @app.get('/logs')
+      def get_logs():
+            logs = RequestLog.query.order_by(RequestLog.timestamp.desc()).limit(100).all()
+            return jsonify([log.to_dict() for log in logs]), 200
 
       with app.app_context():
             db.create_all()
