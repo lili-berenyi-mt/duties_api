@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, abort
 from frontend.repo.duty_repo import DutyRepo
 from frontend.services.duty_service import DutyService
 from frontend.services.results import AddDutyResult
 from frontend.services.theme_service import ThemeService
 from frontend.repo.theme_repo import ThemeRepo
+from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 import requests
 
@@ -14,6 +15,7 @@ theme_service = ThemeService(theme_repo)
 BACKEND_URL = os.environ.get('BACKEND_URL', 'http://localhost:5000')
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 app.secret_key = os.environ.get('SECRET_KEY', 'secret')
 app.service = duty_service
 
@@ -102,11 +104,25 @@ def logout():
 @app.route('/admin/delete-duty/<code>', methods=['POST'])
 def delete_duty(code):
     if session.get('role') != 'admin':
-        from flask import abort
         abort(403)
         
     requests.delete(f"{BACKEND_URL}/duties/{code}")
     return redirect(url_for('index'))
+
+@app.route('/logs')
+def view_logs():
+    if session.get('role') != 'admin':
+        abort(403)
+
+    try:
+        
+        resp = requests.get(f"{BACKEND_URL}/logs")
+        logs = resp.json() if resp.status_code == 200 else []
+    except Exception as e:
+        session["login-error"] = "Backend service is currently unavailable."
+        logs = []
+
+    return render_template('logs.html', logs=logs)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

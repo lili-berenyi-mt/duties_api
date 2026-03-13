@@ -15,7 +15,7 @@ mode = os.getenv("APP_SETTINGS", "default")
 
 def create_app(config_name=mode):
       app = Flask(__name__)
-      app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+      app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
       limiter.init_app(app)
 
       if config_name == "testing":
