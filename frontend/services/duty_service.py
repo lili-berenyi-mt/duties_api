@@ -5,7 +5,9 @@ class DutyService:
     def __init__(self, repo):
         self.repo = repo
 
-    def add(self, number, description):
+    def add(self, number, description, user_role):
+        if user_role != "admin":
+            return AuthResult.UNAUTHORISED
         try:
             new_duty = Duty(number, description)
         except ValueError:
@@ -32,6 +34,6 @@ class DutyService:
         return self.repo.get_by_code(code)
     
     def delete_by_code(self, code, user_role):
-        if user_role == None:
+        if user_role != "admin":
             return AuthResult.UNAUTHORISED
         return self.repo.delete_by_code(code)
